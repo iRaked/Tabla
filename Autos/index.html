@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <link rel="icon" type="image/x-icon" href="assets/SG.ico" />
+  <meta charset="UTF-8" />
+  <title>Tabla Autos</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- 🏁 Título principal del juego -->
+  <h1 class="glow-title rosa"><span>TABLA LOTERIA DE AUTOS</span></h1>
+
+  <!-- 🧑 Input para nombre del usuario -->
+  <input type="text" id="nombreUsuario" placeholder="Ingresa Tu Nick" />
+
+  <!-- 🔘 Botón para iniciar sesión -->
+  <div class="botones">
+    <button class="glow-button btn-login" onclick="iniciarSesion()">Entrar</button>
+  </div>
+
+  <!-- 👤 Visualización del usuario activo -->
+  <div id="usuarioActivoDisplay"></div>
+
+  <canvas id="celebracionCanvas"></canvas>
+
+  <!-- 🃏 Panel de cartas disponibles -->
+  <h3 class="glow-title"><span>Cartas disponibles</span></h3>
+  <div id="panelCartasDisponibles"></div>
+
+  <!-- 🧩 Panel de cartas seleccionadas -->
+  <h3 class="glow-title"><span>Tus cartas seleccionadas</span></h3>
+  <div id="cartasSeleccionadas"></div>
+
+  <!-- 🔘 Botón para copiar carta debajo de las seleccionadas -->
+<div class="botones">
+  <button id="btnCopiarCarta" class="glow-button btn-copy" onclick="copiarCarta()">Copiar Cartas</button>
+</div>
+    
+<!-- TEMPORIZADOR -->
+    <div id="temporizadorReactivacion" class="temporizador-reactivacion"></div>
+
+  <!-- 🌍 Tabla global de usuarios -->
+  <h3 class="glow-title naranja"><span>Tabla global de usuarios</span></h3>
+  <div id="tablaUsuarios"></div>
+    
+    <div id="progresoUsuarios" class="progreso-info"></div>
+
+  <!-- 📜 Script principal -->
+  <script src="main.js"></script>
+</body>
+</html>
