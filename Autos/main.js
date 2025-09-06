@@ -1,30 +1,22 @@
-const MAX_CARTAS_POR_JUGADOR = 2;
+//━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 🗂️ Base de cartas
 const dbCartas = Array.from({ length: 54 }, (_, i) => `${i + 1}.png`);
 let usuarioActivo = null;
 let usuarios = {};
-//  LOGIN
+
+// 🧑‍💻 LOGIN
 function iniciarSesion() {
   const nombre = document.getElementById("nombreUsuario").value.trim();
   if (!nombre) return alert("Ingresa tu nombre");
 
   usuarioActivo = nombre;
 
-  const datosGuardados = localStorage.getItem("usuariosCartas");
-  if (datosGuardados) {
-    usuarios = JSON.parse(datosGuardados);
-  }
-    
-    if (usuarios[usuarioActivo]) {
-  mostrarMensajeBienvenida(usuarioActivo); // 👈 Mensaje para usuarios recurrentes
-} else {
-  usuarios[usuarioActivo] = []; // 👈 Registro nuevo
-}
-
+  // ✅ Validación segura: no restaurar desde localStorage si ya fue limpiado
   if (!usuarios[usuarioActivo]) {
     usuarios[usuarioActivo] = [];
   }
 
-  document.getElementById("usuarioActivoDisplay").textContent = `Bienvenid@, ${usuarioActivo}`;
+  document.getElementById("usuarioActivoDisplay").textContent = `Bienvenido, ${usuarioActivo}`;
   activarCelebracion();
   guardarEstado();
   renderCartasDisponibles();
@@ -34,18 +26,10 @@ function iniciarSesion() {
   verificarInicioTemporizador(); // ✅ Aquí se evalúa si debe iniciar
 }
 
+// 🧹 Filtrado limpio de usuarios activos
 const usuariosFiltrados = Object.entries(usuarios)
-  .filter(([nombre]) => nombre && nombre !== "null")
+  .filter(([nombre]) => nombre && nombre !== "null" && nombre.trim() !== "")
   .sort();
-
-//  SALUDO DE BUENA SUERTE
-function mostrarMensajeBienvenida(nombre) {
-  const mensaje = document.createElement("div");
-  mensaje.textContent = `Bienvenid@ de nuevo ${nombre}, que la suerte te acompañe 🍀`;
-  mensaje.className = "mensaje-bienvenida";
-  document.body.appendChild(mensaje);
-  setTimeout(() => mensaje.remove(), 4000);
-}
 
 //  RENDER DE CARTAS DISPONIBLES
 function renderCartasDisponibles() {
@@ -64,9 +48,9 @@ function renderCartasDisponibles() {
     if (dueño) {
       img.classList.add("ocupada");
       img.title = `Ocupada por ${dueño}`;
-    } else if (usuarios[usuarioActivo].length < MAX_CARTAS_POR_JUGADOR) {
-  img.onclick = () => seleccionarCarta(nombreArchivo);
-}
+    } else if (usuarios[usuarioActivo].length < 3) {
+      img.onclick = () => seleccionarCarta(nombreArchivo);
+    }
 
     panel.appendChild(img);
   });
@@ -92,14 +76,15 @@ function copiarCarta() {
   alert("Cartas copiadas al portapapeles.");
 }
 //  SELECCIÓN DE CARTAS
+//━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function seleccionarCarta(nombreArchivo) {
   const cartas = usuarios[usuarioActivo];
   const cartasOcupadas = obtenerCartasOcupadas();
-
-  if (cartas.length >= MAX_CARTAS_POR_JUGADOR) {
-  alert(`Ya has seleccionado ${MAX_CARTAS_POR_JUGADOR} cartas.`);
-  return;
-}
+    // NUMERO DE CARTAS POR USUARIO ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  if (cartas.length >= 3) {
+    alert("Ya has seleccionado 3 cartas.");
+    return;
+  }
 
   if (cartasOcupadas[nombreArchivo]) {
     alert(`Esta carta ya fue tomada por ${cartasOcupadas[nombreArchivo]}`);
@@ -124,8 +109,7 @@ function renderTablaUsuarios() {
   const table = document.createElement("table");
   const thead = document.createElement("thead");
   const trHead = document.createElement("tr");
-  trHead.innerHTML = "<th>Usuario</th>" + 
-  Array.from({ length: MAX_CARTAS_POR_JUGADOR }, (_, i) => `<th>Carta ${i + 1}</th>`).join("");
+  trHead.innerHTML = "<th>Usuario</th><th>Carta 1</th><th>Carta 2</th><th>Carta 3</th>";
   thead.appendChild(trHead);
   table.appendChild(thead);
 
@@ -133,8 +117,12 @@ function renderTablaUsuarios() {
 
   usuariosOrdenados.forEach(([nombre, cartas]) => {
     const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${nombre}</td>` + 
-  Array.from({ length: MAX_CARTAS_POR_JUGADOR }, (_, i) => `<td>${cartas[i] || ""}</td>`).join("");
+    tr.innerHTML = `
+      <td>${nombre}</td>
+      <td>${cartas[0] || ""}</td>
+      <td>${cartas[1] || ""}</td>
+      <td>${cartas[2] || ""}</td>
+    `;
     tbody.appendChild(tr);
   });
 
@@ -226,8 +214,6 @@ function activarCelebracion() {
   animar();
 }
 
-// PARTE 2 **********************************************************************
-
 // 🎨 CONVERSIÓN DE COLOR HSL → RGB
 function hexToRgb(hslColor) {
   const temp = document.createElement("div");
@@ -239,7 +225,7 @@ function hexToRgb(hslColor) {
 }
 
 // ⏱️ CONFIGURACIÓN DEL TEMPORIZADOR
-const DURACION_MINUTOS = 1; // Cambia a 30 cuando esté listo
+const DURACION_MINUTOS = 3; // Cambia a 30 cuando esté listo
 const DURACION_MS = DURACION_MINUTOS * 60 * 1000;
 const contenedorTemporizador = document.getElementById("temporizadorReactivacion");
 let temporizadorActivo = false;
@@ -250,7 +236,7 @@ function todosHanElegidoCartas() {
   const usuariosValidos = Object.entries(usuarios).filter(([nombre]) => nombre && nombre !== "null");
   if (usuariosValidos.length === 0) return false;
 
-  return usuariosValidos.every(([_, cartas]) => cartas.length === 3); // #CARTAS
+  return usuariosValidos.every(([_, cartas]) => cartas.length === 3);
 }
 
 // 🚦 VERIFICAR INICIO AUTOMÁTICO
@@ -289,32 +275,20 @@ function iniciarTemporizadorGlobal() {
   }, 1000);
 }
 
-function iniciarTemporizador(duracionSegundos) {
-  let tiempoRestante = duracionSegundos;
-
-  intervaloTemporizador = setInterval(() => {
-    tiempoRestante--;
-    actualizarTemporizador(tiempoRestante);
-
-    if (tiempoRestante <= 0) {
-      clearInterval(intervaloTemporizador);
-      reiniciarRonda(); // 💥 Aquí se limpia todo
-    }
-  }, 1000);
-}
-
 // 🧹 LIBERAR CARTAS DE TODOS LOS USUARIOS
 function cambiarCartasGlobalmente() {
   console.log("🧹 Reiniciando selección de cartas...");
 
-  usuarios = {}; // 🔥 Borra todos los usuarios
-  localStorage.removeItem("usuariosCartas"); // 🔥 Limpia el almacenamiento
+  for (const nombre in usuarios) {
+    if (nombre && nombre !== "null") {
+      usuarios[nombre] = [];
+    }
+  }
 
+  guardarEstado();
   renderCartasDisponibles();
   renderCartasSeleccionadas();
-  document.getElementById("tablaUsuarios").innerHTML = ""; // 🔄 Limpieza explícita
   renderTablaUsuarios();
-  mostrarProgresoUsuarios();
   mostrarMensajeCartasActualizadas();
 }
 
@@ -375,14 +349,93 @@ function generarCartasAleatorias() {
   return nuevasCartas;
 }
 
-//  REINICIAR RONDA DESDE CERO
-function reiniciarRonda() {
-  usuarios = {}; // 🔥 Borra todos los usuarios
-  localStorage.removeItem("usuariosCartas"); // ✅ Usa la clave correcta
+// 🆕 BLOQUE NUEVO: Reiniciar juego manualmente
+//━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function reiniciarJuegoManual() {
+  clearInterval(intervaloTemporizador);
+  temporizadorActivo = false;
+  usuarios = {};
+  usuarioActivo = null;
+  localStorage.removeItem("usuariosCartas");
+    setTimeout(verificarInicioTemporizador, 1000);
+    setTimeout(() => {
+  document.getElementById("temporizadorReactivacion").innerHTML = "";
+}, 5000);
 
+  document.getElementById("usuarioActivoDisplay").textContent = "";
+  document.getElementById("cartasSeleccionadas").innerHTML = "";
+  document.getElementById("panelCartasDisponibles").innerHTML = "";
+  document.getElementById("tablaUsuarios").innerHTML = "";
+  document.getElementById("progresoUsuarios").innerHTML = "";
+  document.getElementById("temporizadorReactivacion").innerHTML = "Juego reiniciado 🎉";
+  document.getElementById("nombreUsuario").value = "";
+}
+
+// 🧱 Lista de administradores
+//━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const administradores = ["RICK", "Roger", "Lunita", "Lunna"]; // Añade más si lo deseas
+
+// 🔍 Verificar si el usuario es administrador
+function esAdministrador(nombre) {
+  return administradores.includes(nombre);
+}
+
+////━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 🔐 Reinicio manual con contraseña secreta
+function reiniciarJuegoManual() {
+  if (!esAdministrador(usuarioActivo)) {
+    alert("Solo los administradores pueden reiniciar el juego.");
+    return;
+  }
+
+  // PASWORD ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  const claveConfirmacion = "Raked"; // Puedes cambiarla por otra palabra clave
+  const entrada = prompt(`Escribe la palabra secreta para confirmar el reinicio:`);
+
+  if (entrada !== claveConfirmacion) {
+    alert("Reinicio cancelado. La palabra no coincide.");
+    return;
+  }
+
+  // ✅ Reinicio confirmado
+  clearInterval(intervaloTemporizador);
+  temporizadorActivo = false;
+
+  // 🧹 Limpieza reforzada
+  localStorage.removeItem("usuariosCartas");
+  localStorage.setItem("usuariosCartas", JSON.stringify({})); // Limpieza explícita
+  usuarios = {};
+  usuarioActivo = null;
+
+  // 🧼 Limpieza visual
+  document.getElementById("usuarioActivoDisplay").textContent = "";
+  document.getElementById("cartasSeleccionadas").innerHTML = "";
+  document.getElementById("panelCartasDisponibles").innerHTML = "";
+
+  // 🧼 Verificación de cartas disponibles
+  if (!cartasDisponibles || cartasDisponibles.length === 0) {
+    document.getElementById("panelCartasDisponibles").textContent = "🎴 Sin cartas disponibles";
+  }
+
+  document.getElementById("tablaUsuarios").innerHTML = "";
+  document.getElementById("progresoUsuarios").innerHTML = "";
+  document.getElementById("temporizadorReactivacion").innerHTML = "Juego reiniciado 🎉";
+  document.getElementById("nombreUsuario").value = "";
+
+  // 🔁 Forzar render vacío
   renderTablaUsuarios();
-  renderCartasDisponibles();
-  renderCartasSeleccionadas();
-  mostrarProgresoUsuarios();
-  mostrarMensajeGlobal("🌀 Nueva ronda iniciada. Regístrate para jugar.");
+
+  // 🧪 Verificación opcional en consola
+  console.log("Usuarios después del reinicio:", usuarios);
+
+  setTimeout(verificarInicioTemporizador, 1000);
+}
+
+
+// Mostrar botón Reset solo si es administrador
+const botonReset = document.querySelector(".btn-reset");
+if (esAdministrador(usuarioActivo)) {
+  botonReset.style.display = "inline-block";
+} else {
+  botonReset.style.display = "none";
 }
