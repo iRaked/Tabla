@@ -1,11 +1,18 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <link rel="icon" type="image/x-icon" href="assets/SG.ico" />
-  <meta charset="UTF-8" />
-  <title>Tabla Autos</title>
-  <link rel="stylesheet" href="style.css" />
-</head>
+    <link rel="icon" type="image/x-icon" href="assets/SG.ico" />
+    <!-- BLOCK RIGHT CLICK 
+    <script type="text/javascript">
+    document.onkeydown = function(){return false};
+    document.oncontextmenu = function(){return false}
+    </script>-->
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Tabla Autos</title>
+    <link rel="stylesheet" href="style.css" />
+    
+    </head>
 <body>
   <!-- 🏁 Título principal del juego -->
   <h1 class="glow-title rosa"><span>TABLA LOTERIA DE AUTOS</span></h1>
@@ -47,5 +54,11 @@
 
   <!-- 📜 Script principal -->
   <script src="main.js"></script>
+    
+    <!-- 🆕 Botón para reiniciar juego manualmente -->
+<div class="botones">
+  <button class="glow-button btn-reset" onclick="reiniciarJuegoManual()">Reiniciar Juego</button>
+</div>
+    
 </body>
 </html>
