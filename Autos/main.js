@@ -24,7 +24,7 @@ function iniciarSesion() {
   }
 
   // 🖼️ Actualizar interfaz
-  document.getElementById("usuarioActivoDisplay").textContent = `Bienvenido, ${usuarioActivo}`;
+  document.getElementById("usuarioActivoDisplay").textContent = `Bienvenid@, ${usuarioActivo}`;
   activarCelebracion();
 
   // 💾 Guardar estado completo
