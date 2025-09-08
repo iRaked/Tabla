@@ -1,47 +1,34 @@
-//━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 🗂️ Base de cartas
 const dbCartas = Array.from({ length: 54 }, (_, i) => `${i + 1}.png`);
 let usuarioActivo = null;
 let usuarios = {};
-
-// 🧑‍💻 LOGIN
+//  LOGIN
 function iniciarSesion() {
   const nombre = document.getElementById("nombreUsuario").value.trim();
   if (!nombre) return alert("Ingresa tu nombre");
 
-  // 🧠 Restaurar estado previo si existe
-  const cartasGuardadas = JSON.parse(localStorage.getItem("usuariosCartas"));
-  if (cartasGuardadas) {
-    usuarios = cartasGuardadas;
-  }
-
-  // 🎯 Asignar usuario activo
   usuarioActivo = nombre;
 
-  // 🃏 Inicializar usuario si no existe
+  const datosGuardados = localStorage.getItem("usuariosCartas");
+  if (datosGuardados) {
+    usuarios = JSON.parse(datosGuardados);
+  }
+
   if (!usuarios[usuarioActivo]) {
     usuarios[usuarioActivo] = [];
   }
 
-  // 🖼️ Actualizar interfaz
-  document.getElementById("usuarioActivoDisplay").textContent = `Bienvenid@, ${usuarioActivo}`;
+  document.getElementById("usuarioActivoDisplay").textContent = `Bienvenido, ${usuarioActivo}`;
   activarCelebracion();
-
-  // 💾 Guardar estado completo
   guardarEstado();
-  console.log("🔐 Estado guardado tras iniciar sesión");
-
-  // 🧩 Renderizar componentes
   renderCartasDisponibles();
   renderCartasSeleccionadas();
   renderTablaUsuarios();
-  mostrarProgresoUsuarios();
-  verificarInicioTemporizador();
+  mostrarProgresoUsuarios(); // ✅ Aquí se actualiza el progreso
+  verificarInicioTemporizador(); // ✅ Aquí se evalúa si debe iniciar
 }
 
-// 🧹 Filtrado limpio de usuarios activos
 const usuariosFiltrados = Object.entries(usuarios)
-  .filter(([nombre]) => nombre && nombre !== "null" && nombre.trim() !== "")
+  .filter(([nombre]) => nombre && nombre !== "null")
   .sort();
 
 //  RENDER DE CARTAS DISPONIBLES
@@ -69,63 +56,6 @@ function renderCartasDisponibles() {
   });
 }
 //  COPIAR CARTAS
-const mapaCartas = {
-  1: "Acura",
-  2: "Alfa Romeo",
-  3: "Aston Martin",
-  4: "Audi",
-  5: "Bentley",
-  6: "BMW",
-  7: "Bugatti",
-  8: "Buick",
-  9: "Cadillac",
-  10: "Chevrolet",
-  11: "Chrysler",
-  12: "Citroën",
-  13: "Cupra",
-  14: "Dodge",
-  15: "Ferrari",
-  16: "Fiat",
-  17: "Ford",
-  18: "GMC",
-  19: "Honda",
-  20: "Hummer",
-  21: "Hyundai",
-  22: "Infiniti",
-  23: "Isuzu",
-  24: "Jaguar",
-  25: "Jeep",
-  26: "Kia",
-  27: "Lamborghini",
-  28: "Land Rover",
-  29: "Lexus",
-  30: "Lincoln",
-  31: "Lotus",
-  32: "Maserati",
-  33: "Mazda",
-  34: "Mercedes Benz",
-  35: "Mercury",
-  36: "Mini",
-  37: "Mitsubishi",
-  38: "Nissan",
-  39: "Opel",
-  40: "Pagani",
-  41: "Peugeot",
-  42: "Pontiac",
-  43: "Porsche",
-  44: "RAM",
-  45: "Renault",
-  46: "Rolls Royce",
-  47: "Seat",
-  48: "Shelby",
-  49: "Smart",
-  50: "Subaru",
-  51: "Suzuki",
-  52: "Tesla",
-  53: "Toyota",
-  54: "Volkswagen"
-};
-
 function copiarCarta() {
   if (!usuarioActivo || !usuarios[usuarioActivo] || usuarios[usuarioActivo].length === 0) {
     alert("No hay cartas seleccionadas para copiar.");
@@ -133,10 +63,7 @@ function copiarCarta() {
   }
 
   const cartas = usuarios[usuarioActivo];
-
-  // Convertir números a nombres reales
-  const nombresCartas = cartas.map(num => mapaCartas[parseInt(num)] || `Carta ${num}`);
-  const texto = nombresCartas.join(", ");
+  const texto = `Cartas de ${usuarioActivo}: ${cartas.join(", ")}`;
 
   // Crear un elemento temporal para copiar
   const tempInput = document.createElement("textarea");
@@ -148,13 +75,11 @@ function copiarCarta() {
 
   alert("Cartas copiadas al portapapeles.");
 }
-
 //  SELECCIÓN DE CARTAS
-//━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function seleccionarCarta(nombreArchivo) {
   const cartas = usuarios[usuarioActivo];
   const cartasOcupadas = obtenerCartasOcupadas();
-    // NUMERO DE CARTAS POR USUARIO ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
   if (cartas.length >= 3) {
     alert("Ya has seleccionado 3 cartas.");
     return;
@@ -167,7 +92,6 @@ function seleccionarCarta(nombreArchivo) {
 
   cartas.push(nombreArchivo);
   guardarEstado();
-  localStorage.setItem("inicioRitual", Date.now());
   renderCartasSeleccionadas();
   renderCartasDisponibles();
   renderTablaUsuarios();
@@ -217,7 +141,6 @@ function obtenerCartasOcupadas() {
 //  GUARDAR ESTADO
 function guardarEstado() {
   localStorage.setItem("usuariosCartas", JSON.stringify(usuarios));
-    console.log("💾 Estado guardado en localStorage:", JSON.stringify(usuarios));
 }
 //  RENDER DE CARTAS SELECCIONADAS
 function renderCartasSeleccionadas() {
@@ -290,6 +213,8 @@ function activarCelebracion() {
   animar();
 }
 
+// PARTE 2 **********************************************************************
+
 // 🎨 CONVERSIÓN DE COLOR HSL → RGB
 function hexToRgb(hslColor) {
   const temp = document.createElement("div");
@@ -300,7 +225,6 @@ function hexToRgb(hslColor) {
   return rgb.match(/\d+/g).join(",");
 }
 
-//━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // ⏱️ CONFIGURACIÓN DEL TEMPORIZADOR
 const DURACION_MINUTOS = 3; // Cambia a 30 cuando esté listo
 const DURACION_MS = DURACION_MINUTOS * 60 * 1000;
@@ -318,48 +242,16 @@ function todosHanElegidoCartas() {
 
 // 🚦 VERIFICAR INICIO AUTOMÁTICO
 function verificarInicioTemporizador() {
-  const inicioRitual = parseInt(localStorage.getItem("inicioRitual"), 10);
-  const ahora = Date.now();
-
-  // ⛔ Si el ritual ya expiró, no iniciar temporizador
-  if (inicioRitual && (ahora - inicioRitual >= DURACION_MS)) {
-    console.log("⏳ El ritual ha expirado. No se inicia el temporizador.");
-    return;
-  }
-
-  // ✅ Si todos han elegido y el temporizador no está activo, iniciarlo
   if (todosHanElegidoCartas() && !temporizadorActivo) {
-    const yaIniciado = localStorage.getItem("inicioRitual");
-    if (!yaIniciado) {
-      localStorage.setItem("inicioRitual", Date.now().toString());
-    }
-
-    // 🧪 Verificación DOM antes de iniciar
-    if (contenedorTemporizador) {
-      console.log("🧭 Contenedor del temporizador encontrado.");
-      iniciarTemporizadorGlobal();
-      temporizadorActivo = true;
-      console.log("⏱ Temporizador iniciado automáticamente");
-    } else {
-      console.warn("⚠️ No se encontró el contenedor del temporizador. Verifica el ID.");
-    }
+    iniciarTemporizadorGlobal();
+    temporizadorActivo = true;
+    console.log("⏱ Temporizador iniciado automáticamente");
   }
 }
 
-// 🕒 INICIO DEL TEMPORIZADOR GLOBAL
+// 🕒 INICIO DEL TEMPORIZADOR
 function iniciarTemporizadorGlobal() {
-  const inicioRitual = parseInt(localStorage.getItem("inicioRitual"), 10);
-  const ahora = Date.now();
-
   let tiempoRestante = DURACION_MS;
-
-  // 🧠 Si el ritual ya fue iniciado, ajustar el tiempo restante
-  if (inicioRitual && (ahora - inicioRitual < DURACION_MS)) {
-    tiempoRestante = DURACION_MS - (ahora - inicioRitual);
-  } else {
-    // 📝 Si no hay inicio registrado, lo guardamos ahora
-    localStorage.setItem("inicioRitual", ahora.toString());
-  }
 
   intervaloTemporizador = setInterval(() => {
     tiempoRestante -= 1000;
@@ -367,30 +259,18 @@ function iniciarTemporizadorGlobal() {
     const minutos = Math.floor(tiempoRestante / 60000);
     const segundos = Math.floor((tiempoRestante % 60000) / 1000);
 
-    // 🎯 Mostrar tiempo restante en el contenedor
     contenedorTemporizador.innerHTML = `<span>${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}</span>`;
 
-    // ✨ Activar glow emocional en los últimos 10 segundos
     if (tiempoRestante <= 10000) {
       contenedorTemporizador.classList.add("glow");
     }
 
-    // 🧹 Cuando el tiempo se agota, limpiar y actualizar cartas
     if (tiempoRestante <= 0) {
       clearInterval(intervaloTemporizador);
       contenedorTemporizador.classList.remove("glow");
       contenedorTemporizador.innerHTML = `<span>¡Cartas actualizadas!</span>`;
       cambiarCartasGlobalmente();
       temporizadorActivo = false;
-
-      // 🧼 Limpieza ritual de tablas visuales
-      const tablaAutos = document.getElementById('tabla-autos');
-      const tablaUsuarios = document.getElementById('tabla-usuarios');
-
-      if (tablaAutos) tablaAutos.innerHTML = ''; // Vacía tabla de autos sorteados
-      if (tablaUsuarios) tablaUsuarios.innerHTML = ''; // Vacía tabla de usuarios
-
-      // 🔄 Reiniciar verificación por si nuevos usuarios se unen
       setTimeout(verificarInicioTemporizador, 1000);
     }
   }, 1000);
@@ -468,170 +348,4 @@ function generarCartasAleatorias() {
   }
 
   return nuevasCartas;
-}
-
-// 🆕 BLOQUE NUEVO: Reiniciar juego manualmente
-//━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function reiniciarJuegoManual() {
-  clearInterval(intervaloTemporizador);
-  temporizadorActivo = false;
-  usuarios = {};
-  usuarioActivo = null;
-  localStorage.removeItem("usuariosCartas");
-    setTimeout(verificarInicioTemporizador, 1000);
-    setTimeout(() => {
-  document.getElementById("temporizadorReactivacion").innerHTML = "";
-}, 5000);
-
-  document.getElementById("usuarioActivoDisplay").textContent = "";
-  document.getElementById("cartasSeleccionadas").innerHTML = "";
-  document.getElementById("panelCartasDisponibles").innerHTML = "";
-  document.getElementById("tablaUsuarios").innerHTML = "";
-  document.getElementById("progresoUsuarios").innerHTML = "";
-  document.getElementById("temporizadorReactivacion").innerHTML = "Juego reiniciado 🎉";
-  document.getElementById("nombreUsuario").value = "";
-}
-
-// 🧱 Lista de administradores
-//━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-const administradores = ["RICK", "Roger", "Lunita", "Lunna"]; // Añade más si lo deseas
-
-// 🔍 Verificar si el usuario es administrador
-function esAdministrador(nombre) {
-  return administradores.includes(nombre);
-}
-
-
-
-  // PASWORD ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  const claveConfirmacion = "Raked"; // Puedes cambiarla por otra palabra clave
-  const entrada = prompt(`Escribe la palabra secreta para confirmar el reinicio:`);
-
-  if (entrada !== claveConfirmacion) {
-    alert("Reinicio cancelado. La palabra no coincide.");
-    return;
-  }
-
-  // ✅ Reinicio confirmado
-  clearInterval(intervaloTemporizador);
-  temporizadorActivo = false;
-//━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // ⏳ Temporizador ritual
-setTimeout(() => {
-  // 🧹 Limpieza reforzada
-  localStorage.removeItem("usuariosCartas");
-  localStorage.setItem("usuariosCartas", JSON.stringify({}));
-  usuarios = {};
-  usuarioActivo = null;
-
-  // 🧼 Limpieza visual
-  document.getElementById("usuarioActivoDisplay").textContent = "";
-  document.getElementById("cartasSeleccionadas").innerHTML = "";
-  document.getElementById("panelCartasDisponibles").innerHTML = "";
-
-  alert("El ritual ha concluido. Las cartas han sido liberadas.");
-}, DURACION_RITUAL); // Reemplaza con tu duración real
-
-// 🌅 Restauración al cargar
-//*********************************************************************************
-window.addEventListener("load", () => {
-  const DURACION_RITUAL = 1000 * 60 * 3; // 3 minutos
-  const inicioRitual = parseInt(localStorage.getItem("inicioRitual"), 10);
-  const ahora = Date.now();
-
-  const cartasGuardadas = JSON.parse(localStorage.getItem("usuariosCartas"));
-
-  if (cartasGuardadas && Object.keys(cartasGuardadas).length > 0) {
-    // 🧠 Restaurar estado
-    usuarios = cartasGuardadas;
-    usuarioActivo = Object.keys(usuarios)[0]; // ← puedes ajustar esta lógica si usas múltiples sesiones
-
-    // 🖼️ Renderizar interfaz
-    document.getElementById("usuarioActivoDisplay").textContent = `Bienvenido, ${usuarioActivo}`;
-    renderCartasSeleccionadas();
-    renderCartasDisponibles();
-    renderTablaUsuarios();
-    mostrarProgresoUsuarios();
-
-    // ⏳ Verificar si el ritual sigue activo
-    if (inicioRitual && (ahora - inicioRitual < DURACION_RITUAL)) {
-      const tiempoRestante = DURACION_RITUAL - (ahora - inicioRitual);
-
-      // 🕒 Reprogramar limpieza solo si aún hay tiempo
-      setTimeout(() => {
-        console.log("🧹 Ritual expirado. Se procede a limpiar.");
-        localStorage.removeItem("usuariosCartas");
-        localStorage.removeItem("inicioRitual");
-        usuarios = {};
-        usuarioActivo = null;
-
-        document.getElementById("usuarioActivoDisplay").textContent = "";
-        document.getElementById("cartasSeleccionadas").innerHTML = "";
-        document.getElementById("panelCartasDisponibles").innerHTML = "";
-
-        alert("El ritual ha concluido. Las cartas han sido liberadas.");
-      }, tiempoRestante);
-    } else {
-      // 🧹 Si el tiempo ya expiró, limpiar de inmediato
-      console.log("🧹 Ritual ya expirado. Limpieza inmediata.");
-      localStorage.removeItem("usuariosCartas");
-      localStorage.removeItem("inicioRitual");
-      usuarios = {};
-      usuarioActivo = null;
-
-      document.getElementById("usuarioActivoDisplay").textContent = "";
-      document.getElementById("cartasSeleccionadas").innerHTML = "";
-      document.getElementById("panelCartasDisponibles").innerHTML = "";
-
-      alert("El ritual ha concluido. Las cartas han sido liberadas.");
-    }
-  } else {
-    console.log("📭 No hay cartas guardadas. Estado limpio.");
-  }
-});
-
-  // 🧼 Verificación de cartas disponibles
-  if (!cartasDisponibles || cartasDisponibles.length === 0) {
-    document.getElementById("panelCartasDisponibles").textContent = "🎴 Sin cartas disponibles";
-  }
-
-  document.getElementById("tablaUsuarios").innerHTML = "";
-  document.getElementById("progresoUsuarios").innerHTML = "";
-  document.getElementById("temporizadorReactivacion").innerHTML = "Juego reiniciado 🎉";
-  document.getElementById("nombreUsuario").value = "";
-
-  // 🔁 Forzar render vacío
-  renderTablaUsuarios();
-
-  // 🧪 Verificación opcional en consola
-  console.log("Usuarios después del reinicio:", usuarios);
-
-  setTimeout(verificarInicioTemporizador, 1000);
-}
-
-// 🛡 Mostrar botón Reset solo si el usuario es administrador (case-sensitive)
-function mostrarBotonResetSiAdmin() {
-  const botonReset = document.querySelector(".btn-reset");
-  if (!botonReset) return;
-
-  if (usuarioActivo && esAdministrador(usuarioActivo)) {
-    botonReset.style.display = "inline-block";
-  } else {
-    botonReset.style.display = "none";
-  }
-}
-
-// 🔍 Verificar si el usuario es administrador (sin normalizar)
-function esAdministrador(nombre) {
-  const administradores = ["RICK", "Roger", "Lunita", "Lunna"];
-  return administradores.includes(nombre); // ← Case-sensitive
-}
-
-// Limpieza Tablas de Usuarios
-function reiniciarTablas() {
-  const tablaAutos = document.getElementById('tabla-autos');
-  const tablaUsuarios = document.getElementById('tabla-usuarios');
-
-  if (tablaAutos) tablaAutos.innerHTML = ''; // Limpia la tabla de autos
-  if (tablaUsuarios) tablaUsuarios.innerHTML = ''; // Limpia la tabla de usuarios
 }
