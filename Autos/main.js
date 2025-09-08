@@ -346,7 +346,7 @@ function verificarInicioTemporizador() {
   }
 }
 
-// 🕒 INICIO DEL TEMPORIZADOR
+// 🕒 INICIO DEL TEMPORIZADOR GLOBAL
 function iniciarTemporizadorGlobal() {
   const inicioRitual = parseInt(localStorage.getItem("inicioRitual"), 10);
   const ahora = Date.now();
@@ -382,6 +382,13 @@ function iniciarTemporizadorGlobal() {
       contenedorTemporizador.innerHTML = `<span>¡Cartas actualizadas!</span>`;
       cambiarCartasGlobalmente();
       temporizadorActivo = false;
+
+      // 🧼 Limpieza ritual de tablas visuales
+      const tablaAutos = document.getElementById('tabla-autos');
+      const tablaUsuarios = document.getElementById('tabla-usuarios');
+
+      if (tablaAutos) tablaAutos.innerHTML = ''; // Vacía tabla de autos sorteados
+      if (tablaUsuarios) tablaUsuarios.innerHTML = ''; // Vacía tabla de usuarios
 
       // 🔄 Reiniciar verificación por si nuevos usuarios se unen
       setTimeout(verificarInicioTemporizador, 1000);
@@ -494,13 +501,7 @@ function esAdministrador(nombre) {
   return administradores.includes(nombre);
 }
 
-//━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 🔐 Reinicio manual con contraseña secreta
-function reiniciarJuegoConClave() {
-  if (!esAdministrador(usuarioActivo)) {
-    alert("Solo los administradores pueden reiniciar el juego.");
-    return;
-  }
+
 
   // PASWORD ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   const claveConfirmacion = "Raked"; // Puedes cambiarla por otra palabra clave
@@ -608,16 +609,29 @@ window.addEventListener("load", () => {
   setTimeout(verificarInicioTemporizador, 1000);
 }
 
-
-// Mostrar botón Reset solo si es administrador
-window.addEventListener("DOMContentLoaded", () => {
+// 🛡 Mostrar botón Reset solo si el usuario es administrador (case-sensitive)
+function mostrarBotonResetSiAdmin() {
   const botonReset = document.querySelector(".btn-reset");
-
-  if (!botonReset) return; // 🛡 Protección contra null
+  if (!botonReset) return;
 
   if (usuarioActivo && esAdministrador(usuarioActivo)) {
     botonReset.style.display = "inline-block";
   } else {
     botonReset.style.display = "none";
   }
-});
+}
+
+// 🔍 Verificar si el usuario es administrador (sin normalizar)
+function esAdministrador(nombre) {
+  const administradores = ["RICK", "Roger", "Lunita", "Lunna"];
+  return administradores.includes(nombre); // ← Case-sensitive
+}
+
+// Limpieza Tablas de Usuarios
+function reiniciarTablas() {
+  const tablaAutos = document.getElementById('tabla-autos');
+  const tablaUsuarios = document.getElementById('tabla-usuarios');
+
+  if (tablaAutos) tablaAutos.innerHTML = ''; // Limpia la tabla de autos
+  if (tablaUsuarios) tablaUsuarios.innerHTML = ''; // Limpia la tabla de usuarios
+}
