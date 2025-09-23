@@ -1,7 +1,12 @@
 const dbCartas = Array.from({ length: 54 }, (_, i) => `${i + 1}.png`);
 let usuarioActivo = null;
 let usuarios = {};
-//  LOGIN
+
+// 🔐 Definición global de administradores y clave
+const administradores = ["RICK", "Roger", "Lunita", "Lunna"];
+const claveAdmin = "Raked";
+
+// 🧑 LOGIN
 function iniciarSesion() {
   const nombre = document.getElementById("nombreUsuario").value.trim();
   if (!nombre) return alert("Ingresa tu nombre");
@@ -23,13 +28,70 @@ function iniciarSesion() {
   renderCartasDisponibles();
   renderCartasSeleccionadas();
   renderTablaUsuarios();
-  mostrarProgresoUsuarios(); // ✅ Aquí se actualiza el progreso
-  verificarInicioTemporizador(); // ✅ Aquí se evalúa si debe iniciar
+  mostrarProgresoUsuarios();
+  verificarInicioTemporizador();
+
+  // 👁️ Mostrar botón de reinicio solo si es admin
+  const btnReset = document.querySelector(".btn-reset");
+  if (administradores.includes(usuarioActivo)) {
+    btnReset.style.display = "inline-block";
+  } else {
+    btnReset.style.display = "none";
+  }
 }
 
-const usuariosFiltrados = Object.entries(usuarios)
-  .filter(([nombre]) => nombre && nombre !== "null")
-  .sort();
+// 🔄 Reiniciar Juego con Clave
+function reiniciarJuegoConClave() {
+  if (!administradores.includes(usuarioActivo)) {
+    alert("No tienes permisos para reiniciar el juego.");
+    return;
+  }
+
+  const clave = prompt("Ingresa la clave de administrador:");
+  if (clave !== claveAdmin) {
+    alert("Clave incorrecta. Reinicio cancelado.");
+    return;
+  }
+
+  // 🛑 Detener temporizador
+  if (intervaloTemporizador) {
+    clearInterval(intervaloTemporizador);
+    intervaloTemporizador = null;
+    temporizadorActivo = false;
+  }
+
+  // 🧠 Eliminar todos los usuarios
+  for (const nombre in usuarios) {
+    delete usuarios[nombre];
+  }
+  usuarioActivo = null;
+  localStorage.removeItem("usuariosCartas");
+
+  // 🧼 Limpieza visual
+  document.getElementById("panelCartasDisponibles").innerHTML = "";
+  document.getElementById("cartasSeleccionadas").innerHTML = "";
+  document.getElementById("tablaUsuarios").innerHTML = "";
+  document.getElementById("progresoUsuarios").innerHTML = "";
+  document.getElementById("usuarioActivoDisplay").textContent = "";
+  document.getElementById("nombreUsuario").value = "";
+  contenedorTemporizador.innerHTML = "";
+
+  // 🎉 Limpieza de canvas
+  const canvas = document.getElementById("celebracionCanvas");
+  const ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // 👁️ Ocultar botón de reinicio
+  const btnReset = document.querySelector(".btn-reset");
+  if (btnReset) btnReset.style.display = "none";
+
+  // 🔄 Re-render vacío
+  renderTablaUsuarios();
+  mostrarProgresoUsuarios();
+
+  mostrarMensajeCartasActualizadas();
+  alert("Ciclo cerrado por administrador. El tablero está limpio.");
+}
 
 //  RENDER DE CARTAS DISPONIBLES
 function renderCartasDisponibles() {
@@ -102,8 +164,10 @@ function renderTablaUsuarios() {
   tabla.innerHTML = "";
 
   const usuariosOrdenados = Object.entries(usuarios)
-    .filter(([nombre]) => nombre && nombre !== "null")
+    .filter(([nombre]) => nombre && nombre !== "null" && usuarios[nombre].length > 0)
     .sort();
+
+  if (usuariosOrdenados.length === 0) return; // 🧼 No renderizar tabla vacía
 
   const table = document.createElement("table");
   const thead = document.createElement("thead");
@@ -281,15 +345,26 @@ function cambiarCartasGlobalmente() {
   console.log("🧹 Reiniciando selección de cartas...");
 
   for (const nombre in usuarios) {
-    if (nombre && nombre !== "null") {
-      usuarios[nombre] = [];
-    }
+  if (nombre && nombre !== "null") {
+    delete usuarios[nombre];
   }
+}
 
   guardarEstado();
+
+  // 🧼 Limpieza visual completa
+  document.getElementById("panelCartasDisponibles").innerHTML = "";
+  document.getElementById("cartasSeleccionadas").innerHTML = "";
+  document.getElementById("tablaUsuarios").innerHTML = "";
+  document.getElementById("progresoUsuarios").innerHTML = "";
+  document.getElementById("usuarioActivoDisplay").textContent = "";
+  document.getElementById("nombreUsuario").value = "";
+
   renderCartasDisponibles();
   renderCartasSeleccionadas();
   renderTablaUsuarios();
+  mostrarProgresoUsuarios();
+
   mostrarMensajeCartasActualizadas();
 }
 
